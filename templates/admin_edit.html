@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Product | NailVerse Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #fafafa;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>Edit Product</h2>
+
+    <form method="POST">
+      <label>Name</label>
+      <input type="text" name="name" value="{{ product.name }}" required>
+
+      <label>Price</label>
+      <input type="number" step="0.01" name="price" value="{{ product.price }}" required>
+
+      <label>Image Path</label>
+      <input type="text" name="image" value="{{ product.image }}" required>
+
+      <label>Category</label>
+      <input type="text" name="category" value="{{ product.category }}" required>
+
+      <label>Description</label>
+      <textarea name="description" rows="3" required>{{ product.description }}</textarea>
+
+      <label>
+        <input type="checkbox" name="in_stock" {% if product.in_stock %}checked{% endif %}> In Stock
+      </label>
+
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+
+</body>
+</html>

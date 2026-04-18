@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Error | NailVerse</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #fff3f3;
+      text-align: center;
+      color: #b00000;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 8px;
+      border: 1px solid #d00000;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #2d89ef;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>Payment Failed</h2>
+    <p>{{ error }}</p>
+    <a href="{{ url_for('cart') }}">Return to Cart</a>
+  </div>
+
+</body>
+</html>

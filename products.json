@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "name": "Classic French Tips",
+        "price": 19.99,
+        "image": "images/type1.webp",
+        "category": "Classic",
+        "description": "Elegant white-tipped classic press-on nails.",
+        "in_stock": true,
+        "slug": "classic-french-tips"
+    },
+    {
+        "id": 2,
+        "name": "Rose Gold Chrome",
+        "price": 24.99,
+        "image": "images/rose_gold_chrome.jpg",
+        "category": "Trendy",
+        "description": "Shiny rose gold chrome nails with a luxury finish.",
+        "in_stock": true,
+        "slug": "rose-gold-chrome"
+    },
+    {
+        "id": 3,
+        "name": "Pastel Ombre Fade",
+        "price": 22.99,
+        "image": "images/pastel_ombre.jpg",
+        "category": "Gradient",
+        "description": "Soft pastel ombre fade for a dreamy look.",
+        "in_stock": true,
+        "slug": "pastel-ombre-fade"
+    },
+    {
+        "id": 4,
+        "name": "Minimalist Line Art",
+        "price": 18.99,
+        "image": "images/minimalist_line.jpg",
+        "category": "Minimalist",
+        "description": "Clean minimalist line art for a modern aesthetic.",
+        "in_stock": true,
+        "slug": "minimalist-line-art"
+    },
+    {
+        "id": 5,
+        "name": "Floral Garden Nails",
+        "price": 26.99,
+        "image": "images/floral_garden.jpg",
+        "category": "Artistic",
+        "description": "Hand-painted floral garden design for artistic flair.",
+        "in_stock": true,
+        "slug": "floral-garden-nails"
+    },
+    {
+        "id": 6,
+        "name": "Galaxy Glitter Set",
+        "price": 27.99,
+        "image": "images/galaxy_glitter.jpg",
+        "category": "Fantasy",
+        "description": "Cosmic glitter nails inspired by the galaxy.",
+        "in_stock": true,
+        "slug": "galaxy-glitter-set"
+    }
+]

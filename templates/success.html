@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Successful | NailVerse</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #f0f8ff;
+      text-align: center;
+    }
+
+    .box {
+      background: white;
+      padding: 30px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      color: #2d89ef;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #2d89ef;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    a:hover {
+      background: #1b60c5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>Thank You! 🎉</h2>
+    <p>Your order was placed successfully.</p>
+    <a href="{{ url_for('home') }}">Continue Shopping</a>
+  </div>
+
+</body>
+</html>
