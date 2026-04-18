@@ -2,21 +2,27 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import stripe
 import json
 import os
+from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key_here"
 
-# Stripe Keys
-stripe.api_key = "sk_test_123456"
-PUBLISHABLE_KEY = "pk_test_123456"
+# -----------------------------
+# CONFIG
+# -----------------------------
+app.secret_key = os.getenv("FLASK_SECRET", "fallback_secret_key")
 
-# Product storage
-PRODUCTS_FILE = "products.json"
-ADMIN_PASSWORD = "admin123"
+stripe.api_key = os.getenv("STRIPE_SECRET")
+PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLIC")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PRODUCTS_FILE = os.path.join(BASE_DIR, "products.json")
+ORDERS_FILE = os.path.join(BASE_DIR, "orders.json")
+
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
 
 # -----------------------------
-# PRODUCT HELPERS
+# FILE HELPERS
 # -----------------------------
 def load_products():
     if not os.path.exists(PRODUCTS_FILE):
@@ -28,6 +34,18 @@ def load_products():
 def save_products(products):
     with open(PRODUCTS_FILE, "w") as f:
         json.dump(products, f, indent=4)
+
+
+def load_orders():
+    if not os.path.exists(ORDERS_FILE):
+        return []
+    with open(ORDERS_FILE, "r") as f:
+        return json.load(f)
+
+
+def save_orders(orders):
+    with open(ORDERS_FILE, "w") as f:
+        json.dump(orders, f, indent=4)
 
 
 # -----------------------------
@@ -96,34 +114,63 @@ def checkout():
         cart=cart,
         total=round(total, 2),
         STRIPE_PUBLISHABLE_KEY=PUBLISHABLE_KEY,
-        total_amount_in_cents=int(total * 100)
+        total_amount_in_cents=int(total * 100),
     )
 
 
 @app.route("/create-payment-intent", methods=["POST"])
 def create_payment_intent():
-    data = request.get_json()
-    amount = data.get("amount")
+    cart = session.get("cart", [])
+    if not cart:
+        return jsonify({"error": "Cart is empty"}), 400
 
-    if not amount:
-        return jsonify({"error": "Missing amount"}), 400
+    total = sum(item["price"] for item in cart)
+    amount = int(total * 100)
 
     try:
         intent = stripe.PaymentIntent.create(
-            amount=int(amount),
+            amount=amount,
             currency="usd",
             automatic_payment_methods={"enabled": True},
+            metadata={
+                "item_count": len(cart),
+            },
         )
         return jsonify({"clientSecret": intent.client_secret})
-
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
 
+# -----------------------------
+# SUCCESS + ORDER SAVING
+# -----------------------------
 @app.route("/success")
 def success():
+    cart = session.get("cart", [])
+    name = session.get("customer_name", "Unknown")
+    email = session.get("customer_email", "Unknown")
+
+    total = sum(item["price"] for item in cart)
+
+    # Save order
+    orders = load_orders()
+    new_order = {
+        "id": len(orders) + 1,
+        "name": name,
+        "email": email,
+        "items": cart,
+        "total": round(total, 2),
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    orders.append(new_order)
+    save_orders(orders)
+
+    # Clear cart + customer info
     session["cart"] = []
-    return render_template("success.html")
+    session.pop("customer_name", None)
+    session.pop("customer_email", None)
+
+    return render_template("success.html", order=new_order)
 
 
 @app.route("/error")
@@ -151,7 +198,9 @@ def admin_dashboard():
         return redirect(url_for("admin_login"))
 
     products = load_products()
-    return render_template("admin_dashboard.html", products=products)
+    orders = load_orders()
+
+    return render_template("admin_dashboard.html", products=products, orders=orders)
 
 
 @app.route("/admin/add", methods=["GET", "POST"])
@@ -170,7 +219,7 @@ def admin_add():
             "category": request.form["category"],
             "description": request.form["description"],
             "in_stock": request.form.get("in_stock") == "on",
-            "slug": request.form["name"].lower().replace(" ", "-")
+            "slug": request.form["name"].lower().replace(" ", "-"),
         }
 
         products.append(new_product)
@@ -223,4 +272,5 @@ def admin_delete(product_id):
 # RUN APP
 # -----------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
