@@ -9,7 +9,8 @@
         "placeholder_color": "#f1d9df",
         "description": "Elegant white-tipped classic press-on nails.",
         "in_stock": true,
-        "slug": "classic-french-tips"
+        "slug": "classic-french-tips",
+        "featured": true
     },
     {
         "id": 2,
@@ -21,7 +22,8 @@
         "placeholder_color": "#e3bcc7",
         "description": "Shiny rose gold chrome nails with a luxury finish.",
         "in_stock": true,
-        "slug": "rose-gold-chrome"
+        "slug": "rose-gold-chrome",
+        "featured": true
     },
     {
         "id": 3,
@@ -33,7 +35,8 @@
         "placeholder_color": "#f3c9d4",
         "description": "Soft pastel ombre fade for a dreamy look.",
         "in_stock": true,
-        "slug": "pastel-ombre-fade"
+        "slug": "pastel-ombre-fade",
+        "featured": true
     },
     {
         "id": 4,
@@ -45,7 +48,8 @@
         "placeholder_color": "#e9d3d9",
         "description": "Clean minimalist line art for a modern aesthetic.",
         "in_stock": true,
-        "slug": "minimalist-line-art"
+        "slug": "minimalist-line-art",
+        "featured": true
     },
     {
         "id": 5,
@@ -57,7 +61,8 @@
         "placeholder_color": "#dcaebb",
         "description": "Hand-painted floral garden design for artistic flair.",
         "in_stock": true,
-        "slug": "floral-garden-nails"
+        "slug": "floral-garden-nails",
+        "featured": false
     },
     {
         "id": 6,
@@ -69,7 +74,8 @@
         "placeholder_color": "#c99cae",
         "description": "Cosmic glitter nails inspired by the galaxy.",
         "in_stock": true,
-        "slug": "galaxy-glitter-set"
+        "slug": "galaxy-glitter-set",
+        "featured": false
     },
     {
         "id": 7,
@@ -81,7 +87,8 @@
         "placeholder_color": "#d9c3a3",
         "description": "Hand-woven straw tote with leather trim.",
         "in_stock": true,
-        "slug": "woven-straw-tote"
+        "slug": "woven-straw-tote",
+        "featured": true
     },
     {
         "id": 8,
@@ -93,7 +100,8 @@
         "placeholder_color": "#e6d6c2",
         "description": "Freshwater pearl hair clip with gold-tone finish.",
         "in_stock": true,
-        "slug": "pearl-drop-hair-clip"
+        "slug": "pearl-drop-hair-clip",
+        "featured": true
     },
     {
         "id": 9,
@@ -105,7 +113,8 @@
         "placeholder_color": "#cdb891",
         "description": "Lightweight silk scarf in a soft blush print.",
         "in_stock": true,
-        "slug": "silk-wrap-scarf"
+        "slug": "silk-wrap-scarf",
+        "featured": false
     },
     {
         "id": 10,
@@ -117,7 +126,8 @@
         "placeholder_color": "#a9c4d8",
         "description": "Breezy linen two-piece set in soft blush.",
         "in_stock": true,
-        "slug": "blush-linen-coord"
+        "slug": "blush-linen-coord",
+        "featured": true
     },
     {
         "id": 11,
@@ -129,7 +139,8 @@
         "placeholder_color": "#bcd0dd",
         "description": "Floral wrap slip dress, perfect for warm evenings.",
         "in_stock": true,
-        "slug": "cream-slip-dress"
+        "slug": "cream-slip-dress",
+        "featured": true
     },
     {
         "id": 12,
@@ -141,7 +152,8 @@
         "placeholder_color": "#9fb9cd",
         "description": "Tailored blazer in a dusty rose hue.",
         "in_stock": true,
-        "slug": "dusty-rose-blazer"
+        "slug": "dusty-rose-blazer",
+        "featured": true
     },
     {
         "id": 13,
@@ -153,7 +165,8 @@
         "placeholder_color": "#b3c9db",
         "description": "Soft ivory knit cardigan for layering.",
         "in_stock": true,
-        "slug": "ivory-knit-cardigan"
+        "slug": "ivory-knit-cardigan",
+        "featured": true
     },
     {
         "id": 14,
@@ -165,7 +178,8 @@
         "placeholder_color": "#a5c1d5",
         "description": "Flowing floral midi skirt with a fitted waist.",
         "in_stock": true,
-        "slug": "floral-midi-skirt"
+        "slug": "floral-midi-skirt",
+        "featured": false
     },
     {
         "id": 15,
@@ -177,7 +191,8 @@
         "placeholder_color": "#d4b98c",
         "description": "Classic gold vermeil hoop earrings.",
         "in_stock": true,
-        "slug": "gold-vermeil-hoops"
+        "slug": "gold-vermeil-hoops",
+        "featured": true
     },
     {
         "id": 16,
@@ -189,7 +204,8 @@
         "placeholder_color": "#e0cba0",
         "description": "Delicate layered necklace with freshwater pearls.",
         "in_stock": true,
-        "slug": "layered-pearl-necklace"
+        "slug": "layered-pearl-necklace",
+        "featured": true
     },
     {
         "id": 17,
@@ -201,6 +217,7 @@
         "placeholder_color": "#c9ac7d",
         "description": "Set of three thin stacking rings in mixed gold tones.",
         "in_stock": true,
-        "slug": "stacking-rings-set"
+        "slug": "stacking-rings-set",
+        "featured": false
     }
 ]

@@ -36,10 +36,11 @@ def _render_category(key):
     products = load_products()
     items = [p for p in products if p.get("category", "").lower() == key]
 
-    # First two products get the large "Featured" treatment,
-    # the rest fall into the standard grid below.
-    featured = items[:2]
-    rest = items[2:]
+    # Which products show in the large "Featured" carousel is controlled
+    # explicitly by each product's "featured" flag in products.json,
+    # not by their position in the file.
+    featured = [p for p in items if p.get("featured")]
+    rest = [p for p in items if not p.get("featured")]
 
     return render_template(
         "category.html",

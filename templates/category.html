@@ -12,21 +12,35 @@
 {% if featured %}
 <section class="featured-section">
   <h2 class="section-label">Featured</h2>
-  <div class="featured-grid">
-    {% for product in featured %}
-    <div class="featured-card">
-      <div class="placeholder-img" style="background-color: {{ product.placeholder_color or default_color }};"></div>
-      <div class="featured-overlay">
-        <h3>{{ product.name }}</h3>
-        <p class="price">${{ '%.2f'|format(product.price) }}</p>
+  <div class="featured-carousel">
+    <button type="button" class="carousel-btn prev" aria-label="Scroll featured items left">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="featured-track">
+      {% for product in featured %}
+      <div class="featured-card">
+        <div class="placeholder-img" style="background-color: {{ product.placeholder_color or default_color }};"></div>
+        <div class="featured-overlay">
+          <h3>{{ product.name }}</h3>
+          <p class="price">${{ '%.2f'|format(product.price) }}</p>
+        </div>
+        <form action="{{ url_for('add_to_cart') }}" method="POST" class="quick-add">
+          <input type="hidden" name="product" value="{{ product.name }}">
+          <input type="hidden" name="price" value="{{ product.price }}">
+          <button type="submit">Add to Cart</button>
+        </form>
       </div>
-      <form action="{{ url_for('add_to_cart') }}" method="POST" class="quick-add">
-        <input type="hidden" name="product" value="{{ product.name }}">
-        <input type="hidden" name="price" value="{{ product.price }}">
-        <button type="submit">Add to Cart</button>
-      </form>
+      {% endfor %}
     </div>
-    {% endfor %}
+
+    <button type="button" class="carousel-btn next" aria-label="Scroll featured items right">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 </section>
 {% endif %}
@@ -53,4 +67,40 @@
 {% if not featured and not rest %}
 <p class="empty-state">No products yet in this category &mdash; check back soon.</p>
 {% endif %}
+
+<script>
+  document.querySelectorAll('.featured-carousel').forEach(function (carousel) {
+    var track = carousel.querySelector('.featured-track');
+    var prevBtn = carousel.querySelector('.carousel-btn.prev');
+    var nextBtn = carousel.querySelector('.carousel-btn.next');
+
+    function stepSize() {
+      var card = track.querySelector('.featured-card');
+      if (!card) return track.clientWidth;
+      var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || 24);
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    function updateState() {
+      var maxScroll = track.scrollWidth - track.clientWidth - 1;
+      var overflowing = track.scrollWidth > track.clientWidth + 1;
+
+      carousel.classList.toggle('no-scroll', !overflowing);
+      prevBtn.disabled = !overflowing || track.scrollLeft <= 0;
+      nextBtn.disabled = !overflowing || track.scrollLeft >= maxScroll;
+    }
+
+    prevBtn.addEventListener('click', function () {
+      track.scrollBy({ left: -stepSize(), behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', function () {
+      track.scrollBy({ left: stepSize(), behavior: 'smooth' });
+    });
+
+    track.addEventListener('scroll', updateState);
+    window.addEventListener('resize', updateState);
+    updateState();
+  });
+</script>
 {% endblock %}
