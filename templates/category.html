@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category_display }} | Noemi Closet LLC{% endblock %}
+{% block body_class %}category-page{% endblock %}
+
+{% block content %}
+<section class="category-hero">
+  <h1>{{ category_display }}</h1>
+  <p class="category-tagline">{{ tagline }}</p>
+</section>
+
+{% if featured %}
+<section class="featured-section">
+  <h2 class="section-label">Featured</h2>
+  <div class="featured-grid">
+    {% for product in featured %}
+    <div class="featured-card">
+      <div class="placeholder-img" style="background-color: {{ product.placeholder_color or default_color }};"></div>
+      <div class="featured-overlay">
+        <h3>{{ product.name }}</h3>
+        <p class="price">${{ '%.2f'|format(product.price) }}</p>
+      </div>
+      <form action="{{ url_for('add_to_cart') }}" method="POST" class="quick-add">
+        <input type="hidden" name="product" value="{{ product.name }}">
+        <input type="hidden" name="price" value="{{ product.price }}">
+        <button type="submit">Add to Cart</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if rest %}
+<section class="grid-section">
+  <div class="product-grid">
+    {% for product in rest %}
+    <div class="product-card">
+      <div class="placeholder-img" style="background-color: {{ product.placeholder_color or default_color }};"></div>
+      <h3>{{ product.name }}</h3>
+      <p class="price">${{ '%.2f'|format(product.price) }}</p>
+      <form action="{{ url_for('add_to_cart') }}" method="POST">
+        <input type="hidden" name="product" value="{{ product.name }}">
+        <input type="hidden" name="price" value="{{ product.price }}">
+        <button type="submit" class="btn-add">Add to Cart</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if not featured and not rest %}
+<p class="empty-state">No products yet in this category &mdash; check back soon.</p>
+{% endif %}
+{% endblock %}

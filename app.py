@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import stripe
-import json
 import os
 from datetime import datetime
+
+from data import load_products, save_products, load_orders, save_orders
+from category_routes import register_routes
 
 app = Flask(__name__)
 
@@ -14,52 +16,24 @@ app.secret_key = os.getenv("FLASK_SECRET", "fallback_secret_key")
 stripe.api_key = os.getenv("STRIPE_SECRET")
 PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLIC")
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PRODUCTS_FILE = os.path.join(BASE_DIR, "products.json")
-ORDERS_FILE = os.path.join(BASE_DIR, "orders.json")
-
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
-
-
-# -----------------------------
-# FILE HELPERS
-# -----------------------------
-def load_products():
-    if not os.path.exists(PRODUCTS_FILE):
-        return []
-    with open(PRODUCTS_FILE, "r") as f:
-        return json.load(f)
-
-
-def save_products(products):
-    with open(PRODUCTS_FILE, "w") as f:
-        json.dump(products, f, indent=4)
-
-
-def load_orders():
-    if not os.path.exists(ORDERS_FILE):
-        return []
-    with open(ORDERS_FILE, "r") as f:
-        return json.load(f)
-
-
-def save_orders(orders):
-    with open(ORDERS_FILE, "w") as f:
-        json.dump(orders, f, indent=4)
 
 
 # -----------------------------
 # HOME PAGE
 # -----------------------------
+# The homepage is now just the hero/landing page. Product browsing
+# moved to its own page per category: /nails, /accessories,
+# /clothing, /jewelry (see category_routes.py).
 @app.route("/")
 def home():
-    products = load_products()
-    categories = {}
+    return render_template("home.html", active_page="home")
 
-    for item in products:
-        categories.setdefault(item["category"], []).append(item)
 
-    return render_template("home.html", categories=categories)
+# -----------------------------
+# CATEGORY PAGES (Nails, Accessories, Clothing, Jewelry)
+# -----------------------------
+register_routes(app)
 
 
 # -----------------------------
@@ -160,7 +134,7 @@ def success():
         "email": email,
         "items": cart,
         "total": round(total, 2),
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     orders.append(new_order)
     save_orders(orders)
