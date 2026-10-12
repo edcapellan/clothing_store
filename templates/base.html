@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ brand }}{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/syle.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% include "_banner.html" %}
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="{{ url_for('home') }}" class="logo">{{ brand }}</a>
+
+      <nav class="main-nav">
+        <a href="{{ url_for('nails') }}" class="{{ 'active' if active_page == 'nails' else '' }}">Nails</a>
+        <a href="{{ url_for('accessories') }}" class="{{ 'active' if active_page == 'accessories' else '' }}">Accessories</a>
+        <a href="{{ url_for('clothing') }}" class="{{ 'active' if active_page == 'clothing' else '' }}">Clothing</a>
+        <a href="{{ url_for('jewelry') }}" class="{{ 'active' if active_page == 'jewelry' else '' }}">Jewelry</a>
+      </nav>
+
+      <a href="{{ url_for('cart') }}" class="cart-icon" aria-label="View cart">
+        <span class="cart-count" id="cart-count" {% if not cart_count %}hidden{% endif %}>{{ cart_count }}</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 8V6a6 6 0 0 1 12 0v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4.5 8h15l-1 12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4.5 8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% with msgs = get_flashed_messages() %}
+  <div id="toast" class="toast" role="status" aria-live="polite" data-initial="{{ msgs[0] if msgs else '' }}"></div>
+  {% endwith %}
+
+  <script>
+    (function () {
+      var toast = document.getElementById('toast'), timer;
+      function show(msg) {
+        if (!msg) return;
+        toast.textContent = msg + ' ';
+        var a = document.createElement('a');
+        a.href = "{{ url_for('cart') }}"; a.textContent = 'View cart';
+        toast.appendChild(a);
+        toast.classList.add('show');
+        clearTimeout(timer);
+        timer = setTimeout(function () { toast.classList.remove('show'); }, 4000);
+      }
+      function setCount(n) {
+        var badge = document.getElementById('cart-count');
+        if (n === null || n === undefined) return;
+        badge.textContent = n; badge.hidden = !n;
+      }
+      show(toast.dataset.initial);
+
+      document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (!form.matches('form[data-add-to-cart]')) return;
+        e.preventDefault();
+        var btn = form.querySelector('button');
+        if (btn) btn.disabled = true;
+        fetch(form.action, { method: 'POST', body: new FormData(form),
+                             headers: { 'X-Requested-With': 'fetch' } })
+          .then(function (r) { return r.json(); })
+          .then(function (d) { show(d.message || d.error); setCount(d.count); })
+          .catch(function () { form.submit(); })     // no JS fetch? do the normal post
+          .then(function () { if (btn) btn.disabled = false; });
+      });
+    })();
+  </script>
+</body>
+</html>

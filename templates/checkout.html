@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Checkout | NailVerse</title>
+  <title>Checkout | Noemi Closet LLC</title>
 
   <style>
     body {
@@ -56,6 +56,10 @@
       margin-bottom: 15px;
     }
 
+    select { width: 100%; padding: 12px; margin-bottom: 18px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; background: #fff; }
+    .row { display: flex; gap: 12px; } .row > div { flex: 1; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .notice { background: #fff3f3; color: #b00000; padding: 12px; border-radius: 6px; margin-bottom: 15px; }
     #card-errors {
       color: red;
       margin-bottom: 15px;
@@ -101,6 +105,8 @@
 </head>
 
 <body>
+  {% include "_banner.html" %}
+  <style>.construction-banner{background:#7c3350;color:#fff;text-align:center;padding:.7rem 1rem;font-size:.85rem;margin:-40px -40px 30px}</style>
 
   <h2>Secure Checkout</h2>
 
@@ -108,17 +114,29 @@
 
     <!-- LEFT SIDE: FORM -->
     <div class="checkout-box">
-      <label>Name</label>
-      <input type="text" id="name" required>
+      {% if not payments_ready %}<div class="notice">Payments aren't set up on this site yet.</div>{% endif %}
+      <label for="name">Full name</label>
+      <input type="text" id="name" autocomplete="name" required>
 
-      <label>Email</label>
-      <input type="email" id="email" required>
+      <label for="email">Email (your receipt is sent here)</label>
+      <input type="email" id="email" autocomplete="email" required>
 
-      <label>Card Details</label>
+      <label for="line1">Shipping address</label>
+      <input type="text" id="line1" placeholder="Street address" autocomplete="address-line1" required>
+      <input type="text" id="line2" placeholder="Apt, suite (optional)" autocomplete="address-line2">
+      <div class="row">
+        <div><label for="city">City</label><input type="text" id="city" autocomplete="address-level2" required></div>
+        <div><label for="state">State</label><input type="text" id="state" autocomplete="address-level1" required></div>
+        <div><label for="zip">ZIP</label><input type="text" id="zip" autocomplete="postal-code" required></div>
+      </div>
+      <label for="country">Country</label>
+      <select id="country">{% for code, label in countries.items() %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select>
+
+      <label>Card details</label>
       <div id="card-element"></div>
       <div id="card-errors"></div>
 
-      <button id="payButton">Confirm & Pay</button>
+      <button id="payButton" {% if not payments_ready %}disabled{% endif %}>Confirm &amp; Pay ${{ "%.2f"|format(total) }}</button>
     </div>
 
     <!-- RIGHT SIDE: ORDER SUMMARY -->
@@ -149,47 +167,54 @@
 
   </div>
 
+  {% if payments_ready %}
   <script>
     const stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
     const elements = stripe.elements();
     const card = elements.create("card", { hidePostalCode: true });
     card.mount("#card-element");
 
-    card.on("change", event => {
-      document.getElementById("card-errors").textContent = event.error ? event.error.message : "";
-    });
+    const errBox = document.getElementById("card-errors");
+    const payButton = document.getElementById("payButton");
+    const val = id => document.getElementById(id).value.trim();
 
-    document.getElementById("payButton").addEventListener("click", async () => {
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
+    card.on("change", event => { errBox.textContent = event.error ? event.error.message : ""; });
 
-      const response = await fetch("/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: {{ total_amount_in_cents }} })
-      });
+    payButton.addEventListener("click", async () => {
+      errBox.textContent = "";
+      payButton.disabled = true;               // prevents double charges
+      const label = payButton.textContent;
+      payButton.textContent = "Processing...";
+      const fail = msg => { errBox.textContent = msg; payButton.disabled = false; payButton.textContent = label; };
 
-      const data = await response.json();
+      try {
+        const shipping = { line1: val("line1"), line2: val("line2"), city: val("city"),
+                           state: val("state"), postal_code: val("zip"), country: val("country") };
+        const response = await fetch("/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: val("name"), email: val("email"), shipping })
+        });
+        const data = await response.json();
+        if (data.error) return fail(data.error);
 
-      if (data.error) {
-        window.location.href = "/error";
-        return;
-      }
-
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: card,
-          billing_details: { name, email }
+        const result = await stripe.confirmCardPayment(data.clientSecret, {
+          payment_method: { card: card, billing_details: {
+            name: val("name"), email: val("email"),
+            address: { postal_code: shipping.postal_code, country: shipping.country } } }
+        });
+        if (result.error) return fail(result.error.message);
+        if (result.paymentIntent.status === "succeeded") {
+          window.location.href = "/success?payment_intent=" + encodeURIComponent(result.paymentIntent.id);
+        } else {
+          fail("Payment status: " + result.paymentIntent.status + ". Please try again.");
         }
-      });
-
-      if (result.error) {
-        document.getElementById("card-errors").textContent = result.error.message;
-      } else if (result.paymentIntent.status === "succeeded") {
-        window.location.href = "/success";
+      } catch (e) {
+        fail("Something went wrong. Please try again.");
       }
     });
   </script>
+  {% endif %}
 
 </body>
 </html>
