@@ -39,12 +39,20 @@ register_routes(app)
 # -----------------------------
 # CART SYSTEM
 # -----------------------------
+@app.context_processor
+def inject_cart_count():
+    return {"cart_count": len(session.get("cart", []))}
+
+
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
     product = request.form.get("product")
     price = request.form.get("price")
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
     if not product or not price:
+        if is_ajax:
+            return jsonify({"error": "Product and price are required"}), 400
         return redirect(url_for("home"))
 
     try:
@@ -56,7 +64,13 @@ def add_to_cart():
     cart.append({"product": product, "price": round(price, 2)})
     session["cart"] = cart
 
-    return redirect(url_for("cart"))
+    if is_ajax:
+        return jsonify({"count": len(cart)})
+
+    return_to = request.form.get("return_to", "")
+    if not return_to.startswith("/") or return_to.startswith("//") or "\\" in return_to:
+        return_to = url_for("home")
+    return redirect(return_to)
 
 
 @app.route("/cart")
@@ -247,4 +261,4 @@ def admin_delete(product_id):
 # -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)

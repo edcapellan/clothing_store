@@ -1,9 +1,5 @@
-{% extends "base.html" %}
-
-{% block title %}Noemi Closet LLC{% endblock %}
-{% block body_class %}home-page{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Noemi Closet LLC{% endblock %} {%
+block body_class %}home-page{% endblock %} {% block content %}
 <section class="hero">
   <div class="hero-placeholder"></div>
 
@@ -11,15 +7,17 @@
     <p class="eyebrow">The Luminous Atelier</p>
     <h1>Noemi Closet LLC</h1>
     <p class="hero-sub">
-      A curated ritual for self-expression.<br>
+      A curated ritual for self-expression.<br />
       Crafted press-ons, soft accessories, elevated style.
     </p>
-    <a href="{{ url_for('nails') }}" class="btn-primary">Explore Collection &rarr;</a>
+    <a href="{{ url_for('nails') }}" class="btn-primary"
+      >Explore Collection &rarr;</a
+    >
   </div>
 
-  <div class="scroll-indicator">
+  <!-- <div class="scroll-indicator">
     <span>Scroll</span>
     <div class="scroll-line"></div>
-  </div>
+  </div> -->
 </section>
 {% endblock %}
