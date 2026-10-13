@@ -1,0 +1,21 @@
+# Optional: only used if you create the service as a Render "Blueprint".
+# If you made the service by hand in the dashboard, just add these same
+# environment variables there.
+services:
+  - type: web
+    name: noemi-closet
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: STRIPE_SECRET
+        sync: false
+      - key: STRIPE_PUBLIC
+        sync: false
+      - key: PRODUCTS_SHEET_URL   # optional: Google Sheet CSV link
+        sync: false

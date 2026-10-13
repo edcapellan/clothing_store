@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Noemi Closet LLC{% endblock %}</title>
+    <title>{% block title %}{{ brand }}{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,16 +18,18 @@
 
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='../static/css/syle.css') }}"
+      href="{{ url_for('static', filename='css/syle.css') }}"
     />
     {% block extra_head %}{% endblock %}
   </head>
   <body class="{% block body_class %}{% endblock %}">
+    {% include "_banner.html" %}
+
     <header class="site-header">
       <div class="header-inner">
-        <a href="{{ url_for('home') }}" class="logo">Noemi Closet LLC</a>
+        <a href="{{ url_for('home') }}" class="logo">{{ brand }}</a>
 
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main navigation">
           <a
             href="{{ url_for('nails') }}"
             class="{{ 'active' if active_page == 'nails' else '' }}"
@@ -53,11 +55,13 @@
         <a
           href="{{ url_for('cart') }}"
           class="cart-icon"
+          id="cart-link"
           aria-label="View cart, {{ cart_count }} item{% if cart_count != 1 %}s{% endif %}"
         >
           <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
           <span
             class="cart-count"
+            id="cart-count"
             aria-live="polite"
             data-count="{{ cart_count }}"
             >{{ cart_count }}</span
@@ -67,5 +71,95 @@
     </header>
 
     <main>{% block content %}{% endblock %}</main>
+
+    {% with msgs = get_flashed_messages() %}
+    <div
+      id="toast"
+      class="toast"
+      role="status"
+      aria-live="polite"
+      data-initial="{{ msgs[0] if msgs else '' }}"
+    ></div>
+    {% endwith %}
+
+    <script>
+      (function () {
+        var toast = document.getElementById("toast"),
+          timer;
+        function show(msg) {
+          if (!msg) return;
+          toast.textContent = msg + " ";
+          var a = document.createElement("a");
+          a.href = "{{ url_for('cart') }}";
+          a.textContent = "View cart";
+          toast.appendChild(a);
+          toast.classList.add("show");
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            toast.classList.remove("show");
+          }, 4000);
+        }
+        function setCount(n) {
+          var badge = document.getElementById("cart-count");
+          var cartLink = document.getElementById("cart-link");
+          if (!badge || n === null || n === undefined) return;
+          badge.textContent = n;
+          badge.dataset.count = n;
+          badge.hidden = !n;
+          if (cartLink) {
+            cartLink.setAttribute(
+              "aria-label",
+              "View cart, " + n + " item" + (n === 1 ? "" : "s"),
+            );
+          }
+        }
+        show(toast.dataset.initial);
+
+        document.addEventListener("submit", function (e) {
+          var form = e.target;
+          if (!form.matches("form[data-add-to-cart]")) return;
+          e.preventDefault();
+          var btn = form.querySelector("button");
+          if (btn) btn.disabled = true;
+          fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: { "X-Requested-With": "fetch" },
+          })
+            .then(function (response) {
+              return response.json().then(function (data) {
+                if (!response.ok)
+                  throw new Error(data.error || "Unable to add this item.");
+                return data;
+              });
+            })
+            .then(function (data) {
+              show(data.message || "Added to your cart.");
+              setCount(data.count);
+              if (btn) {
+                var defaultText = btn.textContent;
+                btn.textContent = "Added";
+                btn.classList.add("is-added");
+                clearTimeout(btn.feedbackTimer);
+                btn.feedbackTimer = setTimeout(function () {
+                  btn.textContent = defaultText;
+                  btn.classList.remove("is-added");
+                }, 1200);
+              }
+            })
+            .catch(function (error) {
+              if (error instanceof TypeError) {
+                form.submit();
+                return;
+              }
+              show(error.message || "Unable to add this item.");
+              if (btn) btn.textContent = "Try Again";
+            })
+            .then(function () {
+              if (btn) btn.disabled = false;
+            });
+        });
+      })();
+    </script>
   </body>
 </html>

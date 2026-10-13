@@ -1,94 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Dashboard | NailVerse</title>
+  <title>Admin Dashboard | Noemi Closet LLC</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      background: #fafafa;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 90%;
-      margin: auto;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
-    }
-
-    a.btn {
-      padding: 6px 12px;
-      background: #2d89ef;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    a.delete {
-      background: #d9534f;
-    }
-
-    .top-btn {
-      display: block;
-      width: fit-content;
-      margin: 0 auto 20px;
-      padding: 10px 20px;
-      background: #2d89ef;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: bold;
-    }
+    body { font-family: Arial, sans-serif; padding: 30px; background: #fafafa; color: #333; }
+    h2, h3 { text-align: center; }
+    .box { width: 90%; margin: 0 auto 24px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 16px 20px; }
+    table { width: 90%; margin: 0 auto 30px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; font-size: 14px; }
+    td.left { text-align: left; }
+    .ok { color: #2e7d32; } .bad { color: #c62828; } .warn li { margin: 4px 0; color: #8a5a00; }
+    button { padding: 8px 14px; background: #2d89ef; color: #fff; border: 0; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    .top { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .secondary { background: #555; }
   </style>
 </head>
 <body>
-
   <h2>Admin Dashboard</h2>
+  <div class="top">
+    <form method="POST" action="{{ url_for('admin_reload') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button>Reload products now</button></form>
+    <form method="POST" action="{{ url_for('admin_logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="secondary">Log out</button></form>
+  </div>
 
-  <a href="{{ url_for('admin_add') }}" class="top-btn">+ Add New Product</a>
+  <div class="box">
+    <strong>Product data:</strong> {{ report.product_count }} products loaded from <strong>{{ report.source }}</strong>.
+    Edit the spreadsheet to change products.
+    {% if report.warnings %}
+      <p class="bad"><strong>{{ report.warnings|length }} thing(s) to check in the spreadsheet:</strong></p>
+      <ul class="warn">{% for w in report.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+    {% else %}<p class="ok">No problems found.</p>{% endif %}
+  </div>
 
+  <h3>Products</h3>
   <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Price ($)</th>
-        <th>Category</th>
-        <th>In Stock</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+    <thead><tr><th>Row</th><th>Name</th><th>Category</th><th>Price</th><th>In stock</th><th>Featured</th><th>Photo</th></tr></thead>
     <tbody>
       {% for p in products %}
       <tr>
-        <td>{{ p.id }}</td>
-        <td>{{ p.name }}</td>
-        <td>${{ "%.2f"|format(p.price) }}</td>
-        <td>{{ p.category }}</td>
-        <td>{{ "Yes" if p.in_stock else "No" }}</td>
-        <td>
-          <a class="btn" href="{{ url_for('admin_edit', product_id=p.id) }}">Edit</a>
-          <a class="btn delete" href="{{ url_for('admin_delete', product_id=p.id) }}">Delete</a>
-        </td>
+        <td>{{ p.row }}</td><td class="left">{{ p.name }}</td><td>{{ p.category }}</td>
+        <td>${{ "%.2f"|format(p.price) }}</td><td>{{ "Yes" if p.in_stock else "No" }}</td><td>{{ "Yes" if p.featured else "" }}</td>
+        <td>{% set src = product_image_src(p) %}{% if src %}<img src="{{ src }}" alt="" style="height:36px;border-radius:4px;vertical-align:middle">{% else %}<span class="bad">none</span>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
+  <h3>Orders ({{ orders|length }})</h3>
+  <table>
+    <thead><tr><th>#</th><th>When</th><th>Customer</th><th>Ship to</th><th>Items</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>{{ o.id }}</td><td>{{ o.timestamp }}</td>
+        <td class="left">{{ o.name }}<br>{{ o.email }}</td>
+        <td class="left">{% set s = o.shipping or {} %}{{ s.line1 }} {{ s.line2 }}<br>{{ s.city }}, {{ s.state }} {{ s.postal_code }} {{ s.country }}</td>
+        <td class="left">{% for i in o['items'] %}{{ i.product }}<br>{% endfor %}</td>
+        <td>${{ "%.2f"|format(o.total) }}</td>
+      </tr>
+      {% else %}<tr><td colspan="6">No orders recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </body>
 </html>
