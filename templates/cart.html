@@ -1,7 +1,12 @@
-<!doctype html>
-{% extends "base.html" %} {% block title %}Your Cart | Noemi Closet LLC{%
-endblock %} {% block body_class %}cart-page{% endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}Your Cart | {{ brand }}{% endblock %}
+{% block body_class %}cart-page{% endblock %} {% block content %}
 <div class="cart-container">
+  {% if removed %}
+  <p class="cart-notice" role="status">
+    {{ removed }} item{% if removed != 1 %}s{% endif %} in your cart are no
+    longer available and were removed.
+  </p>
+  {% endif %}
   <a href="{{ url_for('home') }}" class="continue-shopping">
     <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
     Continue Shopping

@@ -37,8 +37,8 @@ def _render_category(key):
     items = [p for p in products if p.get("category", "").lower() == key]
 
     # Which products show in the large "Featured" carousel is controlled
-    # explicitly by each product's "featured" flag in products.json,
-    # not by their position in the file.
+    # explicitly by the "Featured" column in the products spreadsheet,
+    # not by the row's position.
     featured = [p for p in items if p.get("featured")]
     rest = [p for p in items if not p.get("featured")]
 

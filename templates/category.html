@@ -38,21 +38,31 @@ content %}
         <div
           class="placeholder-img"
           style="background-color: {{ product.placeholder_color or default_color }};"
-        ></div>
+        >
+          {% set src = product_image_src(product) %}{% if src %}<img
+            src="{{ src }}"
+            alt="{{ product.name }}"
+            loading="lazy"
+          />{% endif %}
+        </div>
         <div class="featured-overlay">
           <h3>{{ product.name }}</h3>
           <p class="price">${{ '%.2f'|format(product.price) }}</p>
+          {% if product.description %}
+          <p class="desc">{{ product.description }}</p>
+          {% endif %}
         </div>
+        {% if product.in_stock %}
         <form
           action="{{ url_for('add_to_cart') }}"
           method="POST"
-          class="quick-add add-to-cart-form"
+          data-add-to-cart
+          class="quick-add"
         >
-          <input type="hidden" name="product" value="{{ product.name }}" />
-          <input type="hidden" name="price" value="{{ product.price }}" />
-          <input type="hidden" name="return_to" value="{{ request.path }}" />
+          <input type="hidden" name="slug" value="{{ product.slug }}" />
           <button type="submit">Add to Cart</button>
         </form>
+        {% else %}<span class="sold-out quick-add">Sold out</span>{% endif %}
       </div>
       {% endfor %}
     </div>
@@ -88,19 +98,27 @@ content %}
       <div
         class="placeholder-img"
         style="background-color: {{ product.placeholder_color or default_color }};"
-      ></div>
+      >
+        {% set src = product_image_src(product) %}{% if src %}<img
+          src="{{ src }}"
+          alt="{{ product.name }}"
+          loading="lazy"
+        />{% endif %}
+      </div>
       <h3>{{ product.name }}</h3>
       <p class="price">${{ '%.2f'|format(product.price) }}</p>
+      {% if product.description %}
+      <p class="desc">{{ product.description }}</p>
+      {% endif %} {% if product.in_stock %}
       <form
         action="{{ url_for('add_to_cart') }}"
         method="POST"
-        class="add-to-cart-form"
+        data-add-to-cart
       >
-        <input type="hidden" name="product" value="{{ product.name }}" />
-        <input type="hidden" name="price" value="{{ product.price }}" />
-        <input type="hidden" name="return_to" value="{{ request.path }}" />
+        <input type="hidden" name="slug" value="{{ product.slug }}" />
         <button type="submit" class="btn-add">Add to Cart</button>
       </form>
+      {% else %}<span class="sold-out">Sold out</span>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -112,56 +130,6 @@ content %}
 {% endif %}
 
 <script>
-  var cartLink = document.querySelector(".cart-icon");
-  var cartCount = document.querySelector(".cart-count");
-
-  document.querySelectorAll(".add-to-cart-form").forEach(function (form) {
-    var button = form.querySelector('button[type="submit"]');
-    var defaultText = button.textContent;
-
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      button.disabled = true;
-
-      fetch(form.action, {
-        method: form.method,
-        body: new FormData(form),
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-      })
-        .then(function (response) {
-          return response.json().then(function (result) {
-            if (!response.ok)
-              throw new Error(result.error || "Unable to add item");
-            return result;
-          });
-        })
-        .then(function (result) {
-          cartCount.textContent = result.count;
-          cartCount.dataset.count = result.count;
-          cartLink.setAttribute(
-            "aria-label",
-            "View cart, " +
-              result.count +
-              " item" +
-              (result.count === 1 ? "" : "s"),
-          );
-          button.textContent = "Added";
-          button.classList.add("is-added");
-        })
-        .catch(function () {
-          button.textContent = "Try Again";
-        })
-        .then(function () {
-          button.disabled = false;
-          window.clearTimeout(button.feedbackTimer);
-          button.feedbackTimer = window.setTimeout(function () {
-            button.textContent = defaultText;
-            button.classList.remove("is-added");
-          }, 1200);
-        });
-    });
-  });
-
   document.querySelectorAll(".featured-carousel").forEach(function (carousel) {
     var track = carousel.querySelector(".featured-track");
     var prevBtn = carousel.querySelector(".carousel-btn.prev");

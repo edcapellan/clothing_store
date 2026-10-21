@@ -654,3 +654,90 @@ a {
     display: none;
   }
 }
+
+/* -----------------------------
+   PRODUCT PHOTOS + DESCRIPTIONS (added)
+------------------------------ */
+.placeholder-img { overflow: hidden; }
+.placeholder-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.product-card .desc {
+  color: var(--color-body);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 0.9rem;
+}
+.featured-overlay .desc {
+  margin: 0.35rem 7rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+.sold-out {
+  display: inline-block;
+  color: var(--color-body);
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+@media (max-width: 560px) { .featured-overlay .desc { display: none; } }
+
+/* -----------------------------
+   CONSTRUCTION BANNER
+------------------------------ */
+.construction-banner {
+  background: var(--color-accent);
+  color: #fff;
+  text-align: center;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+}
+
+/* -----------------------------
+   CART COUNT + "ADDED" POP-UP
+------------------------------ */
+.cart-icon { position: relative; }
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 18px;
+  text-align: center;
+}
+.cart-count[hidden] { display: none; }
+.toast {
+  position: fixed;
+  top: 100px;
+  right: 1.5rem;
+  z-index: 100;
+  max-width: min(360px, calc(100vw - 3rem));
+  padding: 0.9rem 1.2rem;
+  background: var(--color-heading);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.toast.show { opacity: 1; transform: none; pointer-events: auto; }
+.toast a { color: #f3c9d4; margin-left: 0.4rem; font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
