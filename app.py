@@ -153,33 +153,33 @@ def _back():
 
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
-    # The page's JavaScript sends X-Requested-With: fetch and gets JSON back (pop-up
-    # message, no page change). Without JavaScript, the form still works: it
-    # redirects back to the same page and shows the message after reload.
-    wants_json = request.headers.get("X-Requested-With") == "fetch"
+    slug = request.form.get("slug", "").strip()
+    product = get_product(slug) if slug else None
+    is_fetch = request.headers.get("X-Requested-With") == "fetch"
 
-    def reply(message, ok=True, count=None):
-        if wants_json:
-            body = {"message": message, "count": count}
-            if not ok:
-                body = {"error": message, "count": count}
-            return jsonify(body), (200 if ok else 400)
+    if not product or not product["in_stock"]:
+        message = "This product is no longer available."
+        if is_fetch:
+            return jsonify({"error": message}), 404
         flash(message)
         return _back()
 
-    product = get_product(request.form.get("slug", ""))
-    lines, _, _ = build_cart()
-    if not product or not product["in_stock"]:
-        return reply("Sorry, that item isn't available.", ok=False, count=len(lines))
-    if len(lines) >= MAX_CART_ITEMS:
-        return reply("Your cart is full (%d items max)." % MAX_CART_ITEMS, ok=False,
-                     count=len(lines))
-
     cart = session.get("cart", [])
+    if len(cart) >= MAX_CART_ITEMS:
+        message = "Your cart has reached its item limit."
+        if is_fetch:
+            return jsonify({"error": message}), 400
+        flash(message)
+        return _back()
+
     cart.append(product["slug"])
     session["cart"] = cart
-    session.permanent = True
-    return reply("Added %s to your cart." % product["name"], count=len(cart))
+
+    message = "%s added to your cart." % product["name"]
+    if is_fetch:
+        return jsonify({"count": len(cart), "message": message})
+    flash(message)
+    return _back()
 
 
 @app.route("/cart")
@@ -411,4 +411,4 @@ def admin_reload():
 # -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
